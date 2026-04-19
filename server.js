@@ -267,9 +267,6 @@ wss.on('connection', (telnyxWs, req) => {
         cartesiaReady = false;
       });
 
-      // Store streamSid so we can reference it in media_output handler above
-      // (closure captures it)
-      var streamSid = msg.start?.stream_sid;
       return;
     }
 
