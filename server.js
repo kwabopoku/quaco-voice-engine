@@ -89,6 +89,47 @@ async function updateContactOutcome(contactId, batchId, outcome) {
 // ─── HTTP ROUTES ─────────────────────────────────────────────
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', calls: activeCalls.size, agent: CARTESIA_AGENT_ID, version: 'v12.1' });
+
+
+// ─── OUTBOUND DIAL ───────────────────────────────────────────
+app.post('/dial', async (req, res) => {
+  const { phone, first_name, address, contact_id, batch_id } = req.body;
+  if (!phone) return res.status(400).json({ error: 'phone required' });
+
+  const meta = Buffer.from(JSON.stringify({
+    first_name: first_name || 'there',
+    address: address || '',
+    contact_id: contact_id || null,
+    batch_id: batch_id || null,
+  })).toString('base64');
+
+  try {
+    const resp = await fetch('https://api.telnyx.com/v2/calls', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${TELNYX_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        connection_id: TELNYX_CONNECTION_ID,
+        to: phone,
+        from: FROM_NUMBER,
+        client_state: meta,
+        webhook_url: `${RAILWAY_URL}/telnyx-webhook`,
+        webhook_url_method: 'POST',
+        timeout_secs: 30,
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) return res.status(500).json({ error: data });
+    console.log(`[dial] Calling ${phone} (${first_name}) — ccid: ${data.data?.call_control_id?.slice(-8)}`);
+    res.json({ ok: true, call_control_id: data.data?.call_control_id });
+  } catch (err) {
+    console.error('[dial] Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 });
 
 // Telnyx fires HTTP webhooks here for call state events
