@@ -2,10 +2,10 @@
   "$schema": "https://railway.app/railway-schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "curl -fsSL https://media.base44.com/files/public/69c592a8a57c472b715cb695/75f35c4b0_server_v12_rtp.js -o /tmp/s.js && echo DOWNLOADED_V12_TO_TMP"
+    "buildCommand": "curl -fsSL https://media.base44.com/files/public/69c592a8a57c472b715cb695/75f35c4b0_server_v12_rtp.js -o /tmp/s.mjs && echo DOWNLOADED_V12_TO_TMP"
   },
   "deploy": {
-    "startCommand": "node /tmp/s.js",
+    "startCommand": "node /tmp/s.mjs",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 30,
     "restartPolicyType": "ON_FAILURE",
